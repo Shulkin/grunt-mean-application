@@ -1,14 +1,69 @@
 module.exports = function(grunt) {
   grunt.initConfig({
-    // configure nodemon
+    // js tasks
+    // check all js files for errors
+    jshint: {
+      all: ["public/src/js/**/*.js"]
+    },
+    // take all the js files and minify them into app.min.js
+    uglify: {
+      build: {
+        files: {
+          "public/dist/js/app.min.js": ["public/src/js/**/*.js", "public/src/js/*.js"]
+        }
+      }
+    },
+    // css tasks
+    // process the less file to style.css
+    less: {
+      build: {
+        files: {
+          "public/dist/css/style.css": "public/src/css/style.less"
+        }
+      }
+    },
+    // minify the processed style.css
+    cssmin: {
+      build: {
+        files: {
+          "public/dist/css/style.min.css": "public/dist/css/style.css"
+        }
+      }
+    },
+    // cool tasks
+    // watch css and js files and process the above tasks
+    watch: {
+      css: {
+        files: ["public/src/css/**/*.less"],
+        tasks: ["less", "cssmin"]
+      },
+      js: {
+        files: ["public/src/js/**/*.js"],
+        tasks: ["jshint", "uglify"]
+      }
+    },
+    // watch our node server for changes
     nodemon: {
       dev: {
         script: "server.js"
       }
+    },
+    // run watch and nodemon at the same time
+    concurrent: {
+      options: {
+        logConcurrentOutput: true
+      },
+      tasks: ["nodemon", "watch"]
     }
   });
-  // load nodemon
-  grunt.loadNpmTasks("grunt-nodemon");
-  // register the nodemon task when we run grunt
-  grunt.registerTask("default", ["nodemon"]);
+  // load grunt tasks
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-less');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
+  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-nodemon');
+  grunt.loadNpmTasks('grunt-concurrent');
+  // register the tasks
+  grunt.registerTask("default", ["less", "cssmin", "jshint", "uglify", "concurrent"]);
 };
